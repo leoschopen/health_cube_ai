@@ -1,0 +1,10 @@
+
+.idea/
+.git
+
+**/__pycache__/
+*.pth
+
+HealthCubeAI/core/net/model.pth
+/HealthCubeAI_web/node_modules/
+/HealthCubeAI_web/dist.zip
