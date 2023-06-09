@@ -49,9 +49,15 @@ Redis(可选，最新版)
 
 ### 前端运行
 
-1. 进入前端项目目录 cd frontend
-2. 安装依赖 npm install --registry=https://registry.npm.taobao.org
-3. 启动服务 npm run serve
+
+1. 首先安装v16.17.0版本的nodejs并配置相应的环境
+2. 安装vue npm install vue -g
+3. 安装vue脚手架 npm install vue-cli -g 
+
+
+4. 进入前端项目目录 cd frontend
+5. 安装依赖 npm install --registry=https://registry.npm.taobao.org
+6. 启动服务 npm run serve
 
 
 
