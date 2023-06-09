@@ -19,7 +19,7 @@ HealthCubeAI是一款基于WEB的3D医疗数据解析平台，提供医疗数据
   - Vue.js
   - WebGL
 - 后端
-  - Django
+  - Flask
   - MySQL
   - Redis
 - 深度学习框架
@@ -27,7 +27,7 @@ HealthCubeAI是一款基于WEB的3D医疗数据解析平台，提供医疗数据
 
 ## 系统架构
 
-系统采用前后端分离的架构，前端使用Vue.js框架进行开发，后端使用Django框架进行开发。前端通过WebGL技术实现了3D模型的可视化，后端采用MySQL和Redis数据库存储数据，并使用PaddlePaddle深度学习框架进行数据分割和模型部署。
+系统采用前后端分离的架构，前端使用Vue.js框架进行开发，后端使用Flask框架进行开发。前端通过WebGL技术实现了3D模型的可视化，后端采用MySQL和Redis数据库存储数据，并使用PaddlePaddle深度学习框架进行数据分割和模型部署。
 
 ## 运行预览+环境部署
 ```
@@ -42,20 +42,16 @@ Redis(可选，最新版)
 
 2. 安装依赖环境: pip install -r requirements.txt
 
-3. 执行迁移命令: python manage.py makemigrations python manage.py migrate
-
-4. 初始化数据: python3 manage.py init
-
-5. 启动项目: python3 manage.py runserver 0.0.0.0:8000
+3. flask run
 
 
 
 
 ### 前端运行
 
-1. 进入前端项目目录 cd web
+1. 进入前端项目目录 cd frontend
 2. 安装依赖 npm install --registry=https://registry.npm.taobao.org
-3. 启动服务 npm run dev
+3. 启动服务 npm run serve
 
 
 
