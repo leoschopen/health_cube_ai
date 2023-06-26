@@ -8,6 +8,6 @@
 --save_dir 为推理结果保存路径，文件格式为.nii.npy
 
 
-首先需要再model文件夹下创建一个images文件夹宇results文件夹
+首先需要再model文件夹下创建一个images文件夹与results文件夹
 其次将权重文件放入MedicalSeg/saved_model文件夹下
 [文件下载地址](https://drive.google.com/drive/folders/1huuxj7CgfgV-vk1BAcqwVn2fgGlfyvky?usp=drive_link)
