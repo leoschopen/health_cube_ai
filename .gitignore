@@ -4,9 +4,12 @@
 
 **/__pycache__/
 
+
 *.pth
+*.pdiparams
 
 backend/core/net/model.pth
 
 frontend/node_modules/
 
+# model/MedicalSeg/saved_model/model.pdiparams
