@@ -11,9 +11,10 @@ from flask import *
 import core.main
 import core.net.unet as net
 
-UPLOAD_FOLDER = r'./uploads'
 
-ALLOWED_EXTENSIONS = set(['dcm'])
+UPLOAD_FOLDER = r'.\tmp\uploads'
+
+ALLOWED_EXTENSIONS = set(['dcm','jpg','png'])
 app = Flask(__name__)
 app.secret_key = 'secret!'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -50,14 +51,15 @@ def upload_file():
     print(datetime.datetime.now(), file.filename)
     if file and allowed_file(file.filename):
         src_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+    
         file.save(src_path)
         shutil.copy(src_path, './tmp/ct')
-        image_path = os.path.join('./tmp/ct', file.filename)
-        # print(image_path)
-        pid, image_info = core.main.c_main(image_path, current_app.model)
+        image_path = './tmp/ct/' + file.filename
+        # pid, image_info = core.main.c_main(image_path, current_app.model)
+        pid, image_info = core.main.png_main(image_path)
         return jsonify({'status': 1,
-                        'image_url': 'http://127.0.0.1:5003/tmp/image/' + pid,
-                        'draw_url': 'http://127.0.0.1:5003/tmp/draw/' + pid,
+                        'image_url': 'http://127.0.0.1:5003/' + pid,
+                        'draw_url': 'http://127.0.0.1:5003/' + pid,
                       'image_info': image_info
                        })
 
@@ -74,11 +76,11 @@ def download_file():
 # show photo
 @app.route('/tmp/<path:file>', methods=['GET'])
 def show_photo(file):
-    # print(file)
     if request.method == 'GET':
         if file is None:
             pass
         else:
+            print("=======",file)
             image_data = open(f'tmp/{file}', "rb").read()
             response = make_response(image_data)
             response.headers['Content-Type'] = 'image/png'
@@ -105,6 +107,7 @@ def init_model():
 
 
 if __name__ == '__main__':
-    with app.app_context():
-        current_app.model = init_model()
-    app.run(host='127.0.0.1', port=5003, debug=False)
+    # with app.app_context():
+    #     current_app.model = init_model()
+    app.debug = True
+    app.run(host='127.0.0.1', port=5003, debug=True)

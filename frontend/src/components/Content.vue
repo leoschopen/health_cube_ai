@@ -36,7 +36,7 @@
         <el-button type="primary" @click="welcome">下载测试CT图像</el-button>
       </span>
         </el-dialog>
-        <el-dialog
+        <!-- <el-dialog
             title="AI预测中"
             :visible.sync="dialogTableVisible"
             :show-close="false"
@@ -47,7 +47,7 @@
         >
             <el-progress :percentage="percentage"></el-progress>
             <span slot="footer" class="dialog-footer">非GPU学生服务器性能有限，请耐心等待约一分钟</span>
-        </el-dialog>
+        </el-dialog> -->
 
         <div id="aside">
             <!-- 查看病人信息 -->

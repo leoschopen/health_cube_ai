@@ -10,6 +10,8 @@ def c_main(path,model):
 
     return image_data[1] + '.png', image_info
 
+def png_main(path):
+    return path, ""
 
 if __name__ == '__main__':
     pass

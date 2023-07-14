@@ -48,3 +48,4 @@ def last_process(file_name):
     thresh, contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     draw = cv2.drawContours(image, contours, -1, (0, 255, 0), 2)
     cv2.imwrite(f'./tmp/draw/{file_name}.png', draw)
+
