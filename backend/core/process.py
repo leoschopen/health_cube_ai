@@ -49,3 +49,19 @@ def last_process(file_name):
     draw = cv2.drawContours(image, contours, -1, (0, 255, 0), 2)
     cv2.imwrite(f'./tmp/draw/{file_name}.png', draw)
 
+
+import nibabel as nib
+from mayavi import mlab
+
+
+def visualize_nii(nii_file):
+    # 加载 NIfTI 文件，获取图像数据
+    nii_img = nib.load(nii_file)
+    img_data = nii_img.get_fdata()
+
+    # 使用 mayavi 可视化 3D 图像
+    mlab.figure(bgcolor=(1, 1, 1))
+    obj = mlab.contour3d(img_data, contours=10, transparent=True)
+    mlab.show()
+
+    return obj
