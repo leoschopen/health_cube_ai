@@ -14,7 +14,7 @@ import core.net.unet as net
 
 UPLOAD_FOLDER = r'.\tmp\uploads'
 
-ALLOWED_EXTENSIONS = set(['dcm','jpg','png'])
+ALLOWED_EXTENSIONS = set(['dcm','jpg','png','nii','gz'])
 app = Flask(__name__)
 app.secret_key = 'secret!'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
