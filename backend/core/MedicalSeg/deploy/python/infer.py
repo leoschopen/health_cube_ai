@@ -579,10 +579,130 @@ import os
 import nibabel as nib
 import numpy as np
 import cv2
+import SimpleITK as sitk
 
+def read_nii_info(filepath):
+    sitkImage = sitk.ReadImage(filepath)
+    info = {
+        "origin": sitkImage.GetOrigin(),
+        "size": sitkImage.GetSize(),
+        "spacing": sitkImage.GetSpacing(),
+        "direction": sitkImage.GetDirection(),
+        "dimension": sitkImage.GetDimension(),
+        "width": sitkImage.GetWidth(),
+        "height": sitkImage.GetHeight(),
+        "depth": sitkImage.GetDepth(),
+        "pixel_type": sitkImage.GetPixelIDTypeAsString()
+    }
+    return info
+
+import numpy as np
+import json
+
+def calculate_properties(segmentation, spacing):
+    # 计算目标数量
+    num_targets = len(np.unique(segmentation)) - 1
+    if num_targets < 1:
+        raise ValueError("分割结果中没有目标")
+    
+    # 计算每个目标的属性
+    targets = []
+    for i in range(1, num_targets + 1):
+        # 计算目标表面积
+        surface_area = calculate_surface_area(segmentation == i, spacing)
+        
+        # 计算目标体积
+        volume = calculate_volume(segmentation == i, spacing)
+        
+        # 计算目标在 x、y、z 切面上的直径
+        diameters = calculate_diameters(segmentation == i, spacing)
+        
+        # 将目标属性保存为字典
+        target = {
+            "label": f"target {i}",
+            "surface_area": round(surface_area, 2),
+            "volume": round(volume, 2),
+            "diameters": {
+                "x": round(diameters[0], 2),
+                "y": round(diameters[1], 2),
+                "z": round(diameters[2], 2)
+            }
+        }
+        targets.append(target)
+    
+    return targets
+
+def calculate_surface_area(segmentation, spacing):
+    # 计算表面积
+    dx, dy, dz = spacing
+    x_gradient = np.gradient(np.logical_xor(segmentation, False).astype(int), dx, axis=0)
+    y_gradient = np.gradient(np.logical_xor(segmentation, False).astype(int), dy, axis=1)
+    z_gradient = np.gradient(np.logical_xor(segmentation, False).astype(int), dz, axis=2)
+    surface_area = np.sum(np.sqrt(x_gradient**2 + y_gradient**2 + z_gradient**2))
+    return surface_area * dx * dy * dz
+
+def calculate_volume(segmentation, spacing):
+    # 计算体积
+    volume = np.sum(segmentation)
+    dx, dy, dz = spacing
+    return volume * dx * dy * dz
+
+def calculate_diameters(segmentation, spacing):
+    # 计算直径
+    dx, dy, dz = spacing
+    x_diameter = np.sqrt(np.max(np.sum(segmentation, axis=(1,2))) * dx)
+    y_diameter = np.sqrt(np.max(np.sum(segmentation, axis=(0,2))) * dy)
+    z_diameter = np.sqrt(np.max(np.sum(segmentation, axis=(0,1))) * dz)
+    return x_diameter, y_diameter, z_diameter
+
+import SimpleITK as sitk
+import numpy as np
+import pandas as pd
+
+def get_seg_info_one_slice(output_nii,index):
+    output_img = sitk.ReadImage(output_nii)
+    output_array = sitk.GetArrayFromImage(output_img)
+    pixel_spacing = output_img.GetSpacing()
+
+    # 计算不同类别数据的数量并保存到Pandas DataFrame,类别数需要根据实际情况修改
+    num_classes = len(np.unique(output_array[index]))
+    label = [f"label {i}" for i in range(1, num_classes)]
+    count = [np.sum(output_array[index] == i) for i in range(1, num_classes)]
+    pixel_size = 1.0 # 像素尺寸为1mm x 1mm x 1mm
+    area = [round(np.sum(output_array[index] == i) * pixel_spacing[0] * pixel_spacing[1] * pixel_size, 2) for i in range(1, num_classes)]
+
+    result = pd.DataFrame({
+        "label": label,
+        "count": count,
+        "area": area,
+    })
+    json_data = result.to_json(orient='records', force_ascii=False)
+    json_str = json.loads(json_data)
+    
+    return json_str
+
+def get_seg_info_all_slice(output_nii):
+    output_img = sitk.ReadImage(output_nii)
+    output_array = sitk.GetArrayFromImage(output_img)
+
+    pixel_spacing = output_img.GetSpacing()
+    seg_info  = calculate_properties(output_array, pixel_spacing)
+    result = pd.DataFrame({
+        'label' : [i['label'] for i in seg_info],
+        'surface_area' : [i['surface_area'] for i in seg_info],
+        'volume' : [i['volume'] for i in seg_info],
+        'diameters_x' : [i['diameters']['x'] for i in seg_info],
+        'diameters_y' : [i['diameters']['y'] for i in seg_info],
+        'diameters_z' : [i['diameters']['z'] for i in seg_info],
+    })
+    json_data = result.to_json(orient='records', force_ascii=False)
+    json_str = json.loads(json_data)
+    
+    return json_str
 
 def predict(src_nii_path):
-    print("=====src_nii_path",src_nii_path)
+    # print("=====src_nii_path",src_nii_path)
+    src_nii_info = read_nii_info(src_nii_path)
     predict_nii_path = inference(src_nii_path)
 
     src_nii = nib.load(src_nii_path)
@@ -598,12 +718,26 @@ def predict(src_nii_path):
     # 保存为图片进行展示
     src_path = './tmp/src_display/' + src_nii_path.split('\\')[-1].split('.')[0] + '.png'
     predict_path = './tmp/predict_display/' + predict_nii_path.split('\\')[-1].split('.')[0] + '.png'
-
-
-
     cv2.imwrite(src_path, src_img)
     cv2.imwrite(predict_path, predict_img)
-    return src_path, predict_path, src_slices, predict_slices
+
+    output_img = sitk.ReadImage(predict_nii_path)
+    output_array = sitk.GetArrayFromImage(output_img)
+
+    pixel_spacing = output_img.GetSpacing()
+    seg_info  = calculate_properties(output_array, pixel_spacing)
+
+    # 保存为json
+    src_nii_path = src_nii_path.split('\\')[-1].split('.')[0] + '_src.json'
+    predict_nii_path = predict_nii_path.split('\\')[-1].split('.')[0] + '_predict.json'
+
+    with open('./tmp/json/' + src_nii_path, 'w') as f:
+        json.dump(src_nii_info, f)
+    with open('./tmp/json/' + predict_nii_path, 'w') as f:
+        json.dump(seg_info, f)
+
+
+    return src_path, predict_path, src_slices, predict_slices, src_nii_path, predict_nii_path
 
 
 

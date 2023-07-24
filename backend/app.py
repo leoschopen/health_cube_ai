@@ -70,17 +70,19 @@ def upload_file():
             file.save(src_path)
             shutil.copy(src_path, './tmp/nii')
 
-            src_path, predict_path, src_slices, predict_slices = predict(src_path)
-            image_info = ""
+            src_path, predict_path, src_slices, predict_slices, src_nii_path, predict_nii_path= predict(src_path)
+
             # 展示原图与推理后的图
             return jsonify({'status': 1,
                             'image_url': 'http://127.0.0.1:5003/' + src_path,
                             'draw_url': 'http://127.0.0.1:5003/' + predict_path,
-                        'image_info': image_info
+                        'image_info': src_nii_path,
+                        'seg_info': predict_nii_path
                         })
 
-
     return jsonify({'status': 0})
+
+
 
 
 @app.route("/download", methods=['GET'])
