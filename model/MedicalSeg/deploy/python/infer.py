@@ -38,120 +38,120 @@ from tools import HUnorm, resample
 from tools import Prep
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='Test')
-    parser.add_argument(
-        "--config",
-        dest="cfg",
-        help="The config file.",
-        default=None,
-        type=str,
-        required=True)
-    parser.add_argument(
-        '--image_path',
-        dest='image_path',
-        help='The directory or path or file list of the images to be predicted.',
-        type=str,
-        default=None,
-        required=True)
-    parser.add_argument(
-        '--batch_size',
-        dest='batch_size',
-        help='Mini batch size of one gpu or cpu.',
-        type=int,
-        default=1)
-    parser.add_argument(
-        '--save_dir',
-        dest='save_dir',
-        help='The directory for saving the predict result.',
-        type=str,
-        default='./output')
-    parser.add_argument(
-        '--device',
-        choices=['cpu', 'gpu'],
-        default="gpu",
-        help="Select which device to inference, defaults to gpu.")
 
-    parser.add_argument(
-        '--use_trt',
-        default=False,
-        type=eval,
-        choices=[True, False],
-        help='Whether to use Nvidia TensorRT to accelerate prediction.')
-    parser.add_argument(
-        "--precision",
-        default="fp32",
-        type=str,
-        choices=["fp32", "fp16", "int8"],
-        help='The tensorrt precision.')
-    parser.add_argument(
-        '--enable_auto_tune',
-        default=False,
-        type=eval,
-        choices=[True, False],
-        help='Whether to enable tuned dynamic shape. We uses some images to collect '
-        'the dynamic shape for trt sub graph, which avoids setting dynamic shape manually.'
-    )
-    parser.add_argument(
-        '--auto_tuned_shape_file',
-        type=str,
-        default="auto_tune_tmp.pbtxt",
-        help='The temp file to save tuned dynamic shape.')
+parser = argparse.ArgumentParser(description='Test')
+parser.add_argument(
+    "--config",
+    dest="cfg",
+    help="The config file.",
+    default=None,
+    type=str,
+    required=True)
+parser.add_argument(
+    '--image_path',
+    dest='image_path',
+    help='The directory or path or file list of the images to be predicted.',
+    type=str,
+    default=None,
+    required=True)
+parser.add_argument(
+    '--batch_size',
+    dest='batch_size',
+    help='Mini batch size of one gpu or cpu.',
+    type=int,
+    default=1)
+parser.add_argument(
+    '--save_dir',
+    dest='save_dir',
+    help='The directory for saving the predict result.',
+    type=str,
+    default='./output')
+parser.add_argument(
+    '--device',
+    choices=['cpu', 'gpu'],
+    default="gpu",
+    help="Select which device to inference, defaults to gpu.")
 
-    parser.add_argument(
-        '--cpu_threads',
-        default=10,
-        type=int,
-        help='Number of threads to predict when using cpu.')
-    parser.add_argument(
-        '--enable_mkldnn',
-        default=False,
-        type=eval,
-        choices=[True, False],
-        help='Enable to use mkldnn to speed up when using cpu.')
+parser.add_argument(
+    '--use_trt',
+    default=False,
+    type=eval,
+    choices=[True, False],
+    help='Whether to use Nvidia TensorRT to accelerate prediction.')
+parser.add_argument(
+    "--precision",
+    default="fp32",
+    type=str,
+    choices=["fp32", "fp16", "int8"],
+    help='The tensorrt precision.')
+parser.add_argument(
+    '--enable_auto_tune',
+    default=False,
+    type=eval,
+    choices=[True, False],
+    help='Whether to enable tuned dynamic shape. We uses some images to collect '
+    'the dynamic shape for trt sub graph, which avoids setting dynamic shape manually.'
+)
+parser.add_argument(
+    '--auto_tuned_shape_file',
+    type=str,
+    default="auto_tune_tmp.pbtxt",
+    help='The temp file to save tuned dynamic shape.')
 
-    parser.add_argument(
-        "--benchmark",
-        type=eval,
-        default=False,
-        help="Whether to log some information about environment, model, configuration and performance."
-    )
-    parser.add_argument(
-        "--model_name",
-        default="",
-        type=str,
-        help='When `--benchmark` is True, the specified model name is displayed.'
-    )
+parser.add_argument(
+    '--cpu_threads',
+    default=10,
+    type=int,
+    help='Number of threads to predict when using cpu.')
+parser.add_argument(
+    '--enable_mkldnn',
+    default=False,
+    type=eval,
+    choices=[True, False],
+    help='Enable to use mkldnn to speed up when using cpu.')
 
-    parser.add_argument(
-        '--with_argmax',
-        dest='with_argmax',
-        help='Perform argmax operation on the predict result.',
-        action='store_true')
-    parser.add_argument(
-        '--print_detail',
-        default=True,
-        type=eval,
-        choices=[True, False],
-        help='Print GLOG information of Paddle Inference.')
+parser.add_argument(
+    "--benchmark",
+    type=eval,
+    default=False,
+    help="Whether to log some information about environment, model, configuration and performance."
+)
+parser.add_argument(
+    "--model_name",
+    default="",
+    type=str,
+    help='When `--benchmark` is True, the specified model name is displayed.'
+)
 
-    parser.add_argument(
-        '--use_swl',
-        default=False,
-        type=eval,
-        help='use sliding_window_inference')
+parser.add_argument(
+    '--with_argmax',
+    dest='with_argmax',
+    help='Perform argmax operation on the predict result.',
+    action='store_true')
+parser.add_argument(
+    '--print_detail',
+    default=True,
+    type=eval,
+    choices=[True, False],
+    help='Print GLOG information of Paddle Inference.')
 
-    parser.add_argument('--use_warmup', default=True, type=eval, help='warmup')
+parser.add_argument(
+    '--use_swl',
+    default=False,
+    type=eval,
+    help='use sliding_window_inference')
 
-    parser.add_argument(
-        '--img_shape',
-        default=[128],
-        nargs='+',
-        help='"A single value or three values to specify the size in each dimension."'
-    )
+parser.add_argument('--use_warmup', default=True, type=eval, help='warmup')
 
-    parser.add_argument('--is_nhwd', default=True, type=eval, help='is_nhwd')
-    return parser.parse_args()
+parser.add_argument(
+    '--img_shape',
+    default=[128],
+    nargs='+',
+    help='"A single value or three values to specify the size in each dimension."'
+)
+
+parser.add_argument('--is_nhwd', default=True, type=eval, help='is_nhwd')
+
 
 
 def use_auto_tune(args):
@@ -518,6 +518,48 @@ class Predictor:
             np.save(os.path.join(self.args.save_dir, basename), results)
 
 
+def inference(config_path, img_path, save_dir):
+    args = argparse.Namespace()
+    args.config = config_path
+    args.image_path = img_path
+    args.batch_size = 1
+    args.save_dir = save_dir
+    args.device = 'gpu'
+    args.use_trt = False
+    args.precision = 'fp32'
+    args.enable_auto_tune = False
+    args.auto_tuned_shape_file = 'auto_tune_tmp.pbtxt'
+    args.cpu_threads = 10
+    args.enable_mkldnn = False
+    args.benchmark = False
+    args.model_name = ''
+    args.with_argmax = False
+    args.print_detail = True
+    args.use_swl = False
+    args.use_warmup = True
+    args.img_shape = [128]
+    args.is_nhwd = True
+
+    imgs_list = get_image_list(img_path)
+    if use_auto_tune(args):
+        tune_img_nums = 10
+        auto_tune(args, imgs_list, tune_img_nums)
+        
+    predictor = Predictor(args)
+    predictor.run(imgs_list)
+
+    if use_auto_tune(args) and \
+            os.path.exists(args.auto_tuned_shape_file):
+        os.remove(args.auto_tuned_shape_file)
+
+    # test the speed.
+    if args.benchmark:
+        predictor.autolog.report()
+
+
+
+
+
 def main(args):
     imgs_list = get_image_list(
         args.image_path)  # get image list from image path
@@ -541,5 +583,5 @@ def main(args):
 
 
 if __name__ == '__main__':
-    args = parse_args()
+    args = parser.parse_args()
     main(args)

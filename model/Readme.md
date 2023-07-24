@@ -4,7 +4,7 @@
 --config saved_model/deploy.yaml \
 --image_path ../images \
 --save_dir ../results
---image_path 为待推理图片路径，可以为文件夹、可以为文件
+--image_path D:\PyProject\health_cube_ai\model\images\3a93b3d5-b8be-4b6f-bd00-922d6080d9fb.nii.gz
 --save_dir 为推理结果保存路径，文件格式为.nii.npy
 
 

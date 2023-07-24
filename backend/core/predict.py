@@ -14,23 +14,25 @@ import os
 
 rate = 0.5
 
+import os
+import nibabel as nib
+import numpy as np
+import cv2
 
-def predict(dataset,model):
+def predict(nii_path):
+    img = nib.load(nii_path)
+    data = img.get_fdata()
+    slices = []
+    for i in range(data.shape[2]):
+        slice_data = np.rot90(data[:, :, i])
+        slices.append(slice_data.tolist())
+    predict_img = np.array(slices[0])
+    # 保存为图片
+    predict_path = './tmp/predict/' + nii_path.split('/')[-1].split('.')[0] + '.png'
+    print("======predict_path",predict_path)
+    cv2.imwrite(predict_path, predict_img)
+    return predict_path, slices
 
-    # unet = torch.load('./core/0.5unet.pkl').to(device)
-    # torch.save(unet.state_dict(), "model_new.pth")
-
-    global res, img_y, mask_arrary
-    with torch.no_grad():
-        x = dataset[0][0].to(device)
-        file_name = dataset[1]
-        y = model(x)
-        img_y = torch.squeeze(y).cpu().numpy()
-        img_y[img_y >= rate] = 1
-        img_y[img_y < rate] = 0
-        img_y = img_y * 255
-        cv2.imwrite(f'./tmp/mask/{file_name}_mask.png', img_y,
-                    (cv2.IMWRITE_PNG_COMPRESSION, 0))
 
 
 if __name__ == '__main__':

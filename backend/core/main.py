@@ -13,5 +13,8 @@ def c_main(path,model):
 def png_main(path):
     return path, ""
 
+def nii_main(path):
+    return path, ""
+
 if __name__ == '__main__':
     pass

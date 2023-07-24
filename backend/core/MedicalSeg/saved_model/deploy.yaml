@@ -1,0 +1,6 @@
+Deploy:
+  inference_helper: null
+  model: model.pdmodel
+  params: model.pdiparams
+  transforms:
+  - {}
